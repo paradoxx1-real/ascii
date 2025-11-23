@@ -1,0 +1,162 @@
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Image to ASCII Generator</title>
+  <style>
+    body {
+      font-family: monospace;
+      background: #0b0b0b;
+      color: #e5c7c7;
+      padding: 20px;
+    }
+    .container {
+      max-width: 850px;
+      margin: auto;
+      background: #1a0e0f;
+      padding: 25px;
+      border-radius: 16px;
+      border: 2px solid #3b0f12;
+      box-shadow: 0 0 25px #2a0c0f;
+    }
+    h1, h2 {
+      color: #b02a37;
+    }
+    textarea {
+      width: 100%;
+      height: 420px;
+      background: #110506;
+      color: #ffdde1;
+      padding: 12px;
+      border: 1px solid #4a1317;
+      border-radius: 8px;
+      box-shadow: inset 0 0 10px #2a0c0f;
+    }
+    select, input {
+      padding: 10px;
+      margin: 10px 0;
+      background: #140506;
+      border: 1px solid #5a181d;
+      color: #ffcccc;
+      border-radius: 6px;
+      box-shadow: inset 0 0 10px #2a0c0f;
+    }
+    button {
+      padding: 12px 22px;
+      background: #b02a37;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 8px;
+      font-weight: bold;
+      box-shadow: 0 0 10px #3b0f12;
+      transition: 0.2s;
+    }
+    button:hover {
+      background: #d13b49;
+      box-shadow: 0 0 16px #5a181d;
+    }
+    #logo {
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 28px;
+      font-weight: bold;
+      color: #d13b49;
+      text-shadow: 0 0 15px #5a181d;
+      animation: glow 2s infinite alternate;
+    }@keyframes glow {
+  0% { text-shadow: 0 0 10px #3b0f12; }
+  100% { text-shadow: 0 0 25px #b02a37; }
+}
+
+#output {
+  opacity: 0;
+  transition: opacity 0.6s ease-in-out;
+}
+
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div id="logo">ASCII ART MAKER</div>
+    <h1>Image to ASCII Generator</h1><input type="file" id="imgInput" accept="image/*" />
+<br />
+
+<label for="detail">Detail level:</label>
+<select id="detail">
+  <option value="low">Low</option>
+  <option value="medium" selected>Medium</option>
+  <option value="high">High</option>
+</select>
+
+<label for="width">Width (px):</label>
+<input type="number" id="width" value="120" />
+
+<br />
+<button onclick="convertToAscii()">Generate ASCII</button>
+<div id="loading" style="display:none; margin-top:15px; color:#b02a37; font-weight:bold;">Converting... ⏳</div>
+
+<h2>Output</h2>
+<textarea id="output"></textarea>
+
+  </div>  <script>
+    const ASCII_LEVELS = {
+      low: "@%#*+=-:. ",
+      medium: "@%#*+=-:. ",
+      high: "$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,\"^`'. "
+    };
+
+    function convertToAscii() {
+      document.getElementById("output").style.opacity = 0;
+      document.getElementById("loading").style.display = "block";
+
+      () {
+      const file = document.getElementById("imgInput").files[0];
+      const level = document.getElementById("detail").value;
+      const width = parseInt(document.getElementById("width").value);
+
+      if (!file) {
+        alert("Please select an image first.");
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const img = new Image();
+        img.onload = function () {
+          const canvas = document.createElement("canvas");
+          const ctx = canvas.getContext("2d");
+
+          const aspect = img.height / img.width;
+          canvas.width = width;
+          canvas.height = width * aspect * 0.55;
+
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+          const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          const pixels = imgData.data;
+
+          let ascii = "";
+          const chars = ASCII_LEVELS[level];
+          const interval = 255 / (chars.length - 1);
+
+          for (let y = 0; y < canvas.height; y++) {
+            for (let x = 0; x < canvas.width; x++) {
+              let index = (y * canvas.width + x) * 4;
+              let r = pixels[index], g = pixels[index + 1], b = pixels[index + 2];
+              let gray = 0.299 * r + 0.587 * g + 0.114 * b;
+              ascii += chars[Math.floor(gray / interval)];
+            }
+            ascii += "\n";
+          }
+
+          document.getElementById("output").value = ascii;
+          document.getElementById("output").style.opacity = 1;
+          document.getElementById("loading").style.display = "none";
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+  </script></body>
+</html>index.httlm
